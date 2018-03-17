@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 // import { data } from './data';
-import Wavy from './Wavy/Container';
+import Wavy from './Wavy/Wavy';
 import './App.css';
 
 class App extends Component {
