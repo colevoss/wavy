@@ -112,6 +112,7 @@ class App extends Component {
           <React.Fragment>
             <div>
               <Wavy
+                color="#00FFFF"
                 buffer={this.adioBuffer}
                 height={this.state.height}
                 startMs={this.state.startMs}
@@ -126,6 +127,7 @@ class App extends Component {
                 startMs={this.state.startMs}
                 endMs={this.state.endMs}
                 zoom={this.state.zoom}
+                color="#e600ac"
               />
             </div>
           </React.Fragment>
