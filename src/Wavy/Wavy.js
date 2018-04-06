@@ -2,9 +2,13 @@ import React from 'react';
 import WavyManager from './WavyManager';
 import Color from 'color';
 
+let idCount = 1;
+
 export default class Wavy extends React.Component {
   constructor(props) {
     super(props);
+
+    this.id = `waveform-${idCount++}`;
 
     this.state = {
       realZoom: props.zoom,
@@ -19,6 +23,8 @@ export default class Wavy extends React.Component {
       props.height,
       props.startMs,
       props.endMs,
+      props.selectedMsStart,
+      props.selectedMsEnd,
     );
 
     this.manager.onUpdate(() =>
@@ -34,8 +40,22 @@ export default class Wavy extends React.Component {
     this.manager = null;
   }
 
-  componentWillReceiveProps(nextProps) {
-    this.manager.update({ zoom: nextProps.zoom, height: nextProps.height });
+  componentWillReceiveProps({
+    zoom,
+    height,
+    startMs,
+    endMs,
+    selectedMsStart,
+    selectedMsEnd,
+  }) {
+    this.manager.update({
+      zoom,
+      height,
+      startMs,
+      endMs,
+      selectedMsStart,
+      selectedMsEnd,
+    });
   }
 
   colorDark(selected = false) {
@@ -47,7 +67,7 @@ export default class Wavy extends React.Component {
 
   colorMed(selected = false) {
     return this.color
-      .darken(0.33)
+      .darken(0.25)
       .rgb()
       .string();
   }
@@ -68,6 +88,7 @@ export default class Wavy extends React.Component {
 
   render() {
     const pointsString = this.manager.svgData();
+    console.log(pointsString.length);
 
     return (
       <svg
@@ -75,20 +96,32 @@ export default class Wavy extends React.Component {
         xmlnsXlink="http://www.w3.org/1999/xlink"
         style={{ width: this.manager.width(), height: this.manager.height }}
       >
-        <defs>
-          <clipPath id="selectedmask" width="300" height={this.manager.height}>
-            <rect width="300" height={this.manager.height} />
-          </clipPath>
-        </defs>
+        {this.manager.hasSelection() && (
+          <defs>
+            <clipPath
+              id={`selected-clip-${this.id}`}
+              maskUnits="userSpaceOnUse"
+              height={this.manager.height}
+            >
+              <rect
+                x={this.manager.selectedPxStart()}
+                width={this.manager.selectedPxEnd()}
+                height={this.manager.height}
+              />
+            </clipPath>
+          </defs>
+        )}
 
         <g>
           <rect
             width={this.manager.width()}
             height={this.manager.height}
             fill={this.colorLight()}
+            stroke={this.colorMed()}
+            strokeWidth="2"
+            strokeLinejoin="round"
           />
           <polygon
-            id="waveform"
             points={pointsString}
             fill={this.colorMed()}
             stroke={this.colorDark()}
@@ -97,21 +130,22 @@ export default class Wavy extends React.Component {
           />
         </g>
 
-        <g clipPath="url(#selectedmask)">
-          <rect
-            width={this.manager.width()}
-            height={this.manager.height}
-            fill={this.colorDark()}
-          />
-          <polygon
-            id="waveform"
-            points={pointsString}
-            fill={this.colorLight()}
-            stroke={this.colorExtraLight()}
-            strokeWidth="1"
-            strokeLinejoin="round"
-          />
-        </g>
+        {this.manager.hasSelection() && (
+          <g clipPath={`url(#selected-clip-${this.id})`}>
+            <rect
+              width={this.manager.width()}
+              height={this.manager.height}
+              fill={this.colorDark()}
+            />
+            <polygon
+              points={pointsString}
+              fill={this.colorLight()}
+              stroke={this.colorExtraLight()}
+              strokeWidth="1"
+              strokeLinejoin="round"
+            />
+          </g>
+        )}
       </svg>
     );
   }

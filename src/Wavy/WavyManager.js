@@ -3,16 +3,30 @@ const ZOOM_RATIO = 0.01;
 export default class WavyManager {
   updateableProps = ['zoom', 'height', 'startMs', 'endMs'];
 
-  constructor(buffer, zoom, height, startMs, endMs) {
+  constructor(
+    buffer,
+    zoom,
+    height,
+    startMs,
+    endMs,
+    selectedMsStart,
+    selectedMsEnd,
+  ) {
     this.buffer = buffer;
     this.zoom = zoom;
     this.height = height;
     this.sampleRate = this.buffer.sampleRate;
+    this.selectedMsStart = selectedMsStart;
+    this.selectedMsEnd = selectedMsEnd;
 
     this.initSampleMetaData();
 
     this.startMs = startMs || 0;
     this.endMs = endMs || this.durationMs();
+  }
+
+  hasSelection() {
+    return this.selectedMsStart !== null || this.selectedMsEnd !== null;
   }
 
   onUpdate(fn) {
@@ -53,8 +67,14 @@ export default class WavyManager {
 
   updateHeight(height) {
     this.height = height;
+  }
 
-    this.broadcastUpdate();
+  updateSelectedMsStart(ms) {
+    this.selectedMsStart = ms;
+  }
+
+  updateSelectedMsEnd(ms) {
+    this.selectedMsEnd = ms;
   }
 
   throttleZoomUpdate(zoom) {
@@ -94,6 +114,18 @@ export default class WavyManager {
 
   totalSamples() {
     return this.endSample() - this.startSample();
+  }
+
+  msToPx(ms) {
+    return ms * ZOOM_RATIO * (this.tmpZoom || this.zoom);
+  }
+
+  selectedPxStart() {
+    return this.msToPx(this.selectedMsStart || 0);
+  }
+
+  selectedPxEnd() {
+    return this.msToPx(this.selectedMsEnd || this.durationMs());
   }
 
   width() {
