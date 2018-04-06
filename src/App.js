@@ -122,7 +122,7 @@ class App extends Component {
                 zoom={this.state.zoom}
               />
             </div>
-            <div>
+            {/* <div>
               <Wavy
                 buffer={this.adioBuffer}
                 height={this.state.height}
@@ -133,7 +133,7 @@ class App extends Component {
                 zoom={this.state.zoom}
                 color="#0066ff"
               />
-            </div>
+            </div> */}
           </React.Fragment>
         )}
       </div>

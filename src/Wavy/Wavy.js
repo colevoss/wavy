@@ -28,7 +28,8 @@ export default class Wavy extends React.Component {
     );
 
     this.manager.onUpdate(() =>
-      this.setState(({ version }) => ({ version: version + 1 })),
+      // this.setState(({ version }) => ({ version: version + 1 })),
+      this.forceUpdate(),
     );
   }
 
@@ -88,7 +89,6 @@ export default class Wavy extends React.Component {
 
   render() {
     const pointsString = this.manager.svgData();
-    console.log(pointsString.length);
 
     return (
       <svg
