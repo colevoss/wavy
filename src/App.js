@@ -6,7 +6,7 @@ import './App.css';
 class App extends Component {
   state = {
     audioLoaded: false,
-    zoom: 1,
+    zoom: 10,
     startMs: 0,
     endMs: null,
     height: 100,
@@ -22,12 +22,14 @@ class App extends Component {
 
   getAdioFile() {
     const request = new XMLHttpRequest();
-    request.open('GET', 'adio_file.wav', true);
+    request.open('GET', 'adio_file5.wav', true);
 
     request.responseType = 'arraybuffer';
 
+    console.time('Download');
     request.onload = () => {
       this.decodeBuffer(request.response);
+      console.timeEnd('Download');
     };
 
     request.send();
@@ -57,8 +59,8 @@ class App extends Component {
           Zooom
           <input
             type="range"
-            min="1"
-            max="40"
+            min="100"
+            max="1000"
             step="0.01"
             value={this.state.zoom}
             onChange={(e) => {
@@ -122,18 +124,16 @@ class App extends Component {
                 zoom={this.state.zoom}
               />
             </div>
-            {/* <div>
+            <div>
               <Wavy
                 buffer={this.adioBuffer}
                 height={this.state.height}
-                selectedMsStart={4000}
-                selectedMsEnd={5000}
                 startMs={this.state.startMs}
                 endMs={this.state.endMs}
                 zoom={this.state.zoom}
-                color="#0066ff"
+                color="#ff0000"
               />
-            </div> */}
+            </div>
           </React.Fragment>
         )}
       </div>

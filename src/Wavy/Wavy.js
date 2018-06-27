@@ -1,5 +1,6 @@
 import React from 'react';
-import WavyManager from './WavyManager';
+// import WavyManager from './WavyManager';
+import WavyManager from './Ratio';
 import Color from 'color';
 
 let idCount = 1;
@@ -18,13 +19,13 @@ export default class Wavy extends React.Component {
     this.color = Color(props.color);
 
     this.manager = new WavyManager(
-      props.buffer,
       props.zoom,
+      props.buffer,
       props.height,
       props.startMs,
       props.endMs,
-      props.selectedMsStart,
-      props.selectedMsEnd,
+      // props.selectedMsStart,
+      // props.selectedMsEnd,
     );
 
     this.manager.onUpdate(() =>
@@ -88,13 +89,16 @@ export default class Wavy extends React.Component {
   }
 
   render() {
-    const pointsString = this.manager.svgData();
+    // const pointsString = this.manager.svgData();
+    console.time('Draw');
+    const pointsString = this.manager.draw();
+    console.timeEnd('Draw');
 
     return (
       <svg
         xmlns="http://www.w3.org/2000/svg"
         xmlnsXlink="http://www.w3.org/1999/xlink"
-        style={{ width: this.manager.width(), height: this.manager.height }}
+        style={{ width: this.manager.width, height: this.manager.height }}
       >
         {this.manager.hasSelection() && (
           <defs>
@@ -114,7 +118,7 @@ export default class Wavy extends React.Component {
 
         <g>
           <rect
-            width={this.manager.width()}
+            width={this.manager.width}
             height={this.manager.height}
             fill={this.colorLight()}
             stroke={this.colorMed()}
@@ -133,7 +137,7 @@ export default class Wavy extends React.Component {
         {this.manager.hasSelection() && (
           <g clipPath={`url(#selected-clip-${this.id})`}>
             <rect
-              width={this.manager.width()}
+              width={this.manager.width}
               height={this.manager.height}
               fill={this.colorDark()}
             />
