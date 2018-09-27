@@ -1,5 +1,6 @@
 import React from 'react';
-import WavyManager from './WavyManager';
+// import WavyManager from './WavyManager';
+import WavyManager from './Ratio';
 import Color from 'color';
 
 let idCount = 1;
@@ -18,8 +19,8 @@ export default class Wavy extends React.Component {
     this.color = Color(props.color);
 
     this.manager = new WavyManager(
-      props.buffer,
       props.zoom,
+      props.buffer,
       props.height,
       props.startMs,
       props.endMs,
@@ -88,13 +89,17 @@ export default class Wavy extends React.Component {
   }
 
   render() {
-    const pointsString = this.manager.svgData();
+    // const pointsString = this.manager.svgData();
+    // console.time('Draw');
+    // const pointsString = this.manager.draw();
+    const pointsString = this.manager.points;
+    // console.timeEnd('Draw');
 
     return (
       <svg
         xmlns="http://www.w3.org/2000/svg"
         xmlnsXlink="http://www.w3.org/1999/xlink"
-        style={{ width: this.manager.width(), height: this.manager.height }}
+        style={{ width: this.manager.width, height: this.manager.height }}
       >
         {this.manager.hasSelection() && (
           <defs>
@@ -104,8 +109,10 @@ export default class Wavy extends React.Component {
               height={this.manager.height}
             >
               <rect
-                x={this.manager.selectedPxStart()}
-                width={this.manager.selectedPxEnd()}
+                x={this.manager.selectedPxStart}
+                width={
+                  this.manager.selectedPxEnd - this.manager.selectedMsStart
+                }
                 height={this.manager.height}
               />
             </clipPath>
@@ -114,31 +121,42 @@ export default class Wavy extends React.Component {
 
         <g>
           <rect
-            width={this.manager.width()}
+            width={this.manager.width}
             height={this.manager.height}
             fill={this.colorLight()}
             stroke={this.colorMed()}
             strokeWidth="2"
             strokeLinejoin="round"
           />
-          <polygon
-            points={pointsString}
-            fill={this.colorMed()}
-            stroke={this.colorDark()}
-            strokeWidth="1"
-            strokeLinejoin="round"
-          />
+          {pointsString && (
+            <path
+              d={pointsString}
+              fill={this.colorMed()}
+              stroke={this.colorDark()}
+              strokeWidth="1"
+              strokeLinejoin="round"
+            />
+          )}
+          {/* {pointsString && (
+            <polygon
+              points={pointsString}
+              fill={this.colorMed()}
+              stroke={this.colorDark()}
+              strokeWidth="1"
+              strokeLinejoin="round"
+            />
+          )} */}
         </g>
 
         {this.manager.hasSelection() && (
           <g clipPath={`url(#selected-clip-${this.id})`}>
             <rect
-              width={this.manager.width()}
+              width={this.manager.width}
               height={this.manager.height}
               fill={this.colorDark()}
             />
-            <polygon
-              points={pointsString}
+            <path
+              d={pointsString}
               fill={this.colorLight()}
               stroke={this.colorExtraLight()}
               strokeWidth="1"

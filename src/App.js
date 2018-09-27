@@ -6,7 +6,7 @@ import './App.css';
 class App extends Component {
   state = {
     audioLoaded: false,
-    zoom: 1,
+    zoom: 1000,
     startMs: 0,
     endMs: null,
     height: 100,
@@ -22,12 +22,18 @@ class App extends Component {
 
   getAdioFile() {
     const request = new XMLHttpRequest();
-    request.open('GET', 'adio_file.wav', true);
+    const fileName = 'adio_file1.wav';
+    // const fileName =
+    //   'https://adio-clips-dev.s3.amazonaws.com/projects/292e9b70-9158-11e8-a5ed-cd33a7f93beb/clips/472a3c60-9158-11e8-a939-7b5493fa3d06.wav';
+
+    request.open('GET', fileName, true);
 
     request.responseType = 'arraybuffer';
 
+    console.time('Download');
     request.onload = () => {
       this.decodeBuffer(request.response);
+      console.timeEnd('Download');
     };
 
     request.send();
@@ -57,8 +63,8 @@ class App extends Component {
           Zooom
           <input
             type="range"
-            min="1"
-            max="40"
+            min="100"
+            max="1000"
             step="0.01"
             value={this.state.zoom}
             onChange={(e) => {
@@ -117,23 +123,21 @@ class App extends Component {
                 height={this.state.height}
                 startMs={this.state.startMs}
                 endMs={this.state.endMs}
-                selectedMsStart={4000}
-                selectedMsEnd={5000}
+                selectedMsStart={100}
+                selectedMsEnd={1000}
                 zoom={this.state.zoom}
               />
             </div>
-            {/* <div>
+            <div>
               <Wavy
                 buffer={this.adioBuffer}
                 height={this.state.height}
-                selectedMsStart={4000}
-                selectedMsEnd={5000}
                 startMs={this.state.startMs}
                 endMs={this.state.endMs}
                 zoom={this.state.zoom}
-                color="#0066ff"
+                color="#ff0000"
               />
-            </div> */}
+            </div>
           </React.Fragment>
         )}
       </div>
