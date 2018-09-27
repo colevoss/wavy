@@ -6,7 +6,7 @@ import './App.css';
 class App extends Component {
   state = {
     audioLoaded: false,
-    zoom: 10,
+    zoom: 1000,
     startMs: 0,
     endMs: null,
     height: 100,
@@ -22,7 +22,11 @@ class App extends Component {
 
   getAdioFile() {
     const request = new XMLHttpRequest();
-    request.open('GET', 'adio_file5.wav', true);
+    const fileName = 'adio_file1.wav';
+    // const fileName =
+    //   'https://adio-clips-dev.s3.amazonaws.com/projects/292e9b70-9158-11e8-a5ed-cd33a7f93beb/clips/472a3c60-9158-11e8-a939-7b5493fa3d06.wav';
+
+    request.open('GET', fileName, true);
 
     request.responseType = 'arraybuffer';
 
@@ -119,8 +123,8 @@ class App extends Component {
                 height={this.state.height}
                 startMs={this.state.startMs}
                 endMs={this.state.endMs}
-                selectedMsStart={4000}
-                selectedMsEnd={5000}
+                selectedMsStart={100}
+                selectedMsEnd={1000}
                 zoom={this.state.zoom}
               />
             </div>
