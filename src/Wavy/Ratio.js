@@ -1,5 +1,10 @@
 // pxPerSecond = 100
 // sampleRate = 200
+import { curveNatural, area } from 'd3-shape';
+import * as d3Select from 'd3-selection';
+import * as d3Trans from 'd3-transition';
+
+const GRANULARITY = 2;
 
 export default class Ratio {
   constructor(
@@ -10,6 +15,7 @@ export default class Ratio {
     endMs,
     selectedMsStart,
     selectedMsEnd,
+    waveformId,
   ) {
     // Ratio represents pixels per second of audio
     this.ratio = ratio;
@@ -19,6 +25,13 @@ export default class Ratio {
     this.height = height;
     this.selectedMsStart = selectedMsStart;
     this.selectedMsEnd = selectedMsEnd;
+
+    this.waveformId = waveformId;
+
+    this.waveformPath = d3Select.select(`path#${this.waveformId}`);
+    this.transition = d3Trans.transition().duration(100);
+
+    console.log(this.waveformPath);
 
     // console.log(this.bufferDurationSeconds);
     // console.log(this.width);
@@ -53,7 +66,7 @@ export default class Ratio {
   }
 
   get samplesPerPixel() {
-    return this.sampleRate / this.ratio;
+    return (this.sampleRate / this.ratio) * GRANULARITY;
   }
 
   get msPerPx() {
@@ -107,14 +120,11 @@ export default class Ratio {
   }
 
   downsample() {
-    // console.time('Downsample');
-    // const startSample = this.startSample;
-    // const endSample = this.endSample;
+    this.waveformPath = d3Select.select(`path#${this.waveformId}`);
+    console.time('Downsample');
     const chunkSize = ~~this.samplesPerPixel;
     const samples = this.samples;
 
-    // this.downsamples = [[0, 0]];
-    // this.downsamples = [];
     const downsamples = [];
 
     const numberOfBuckets = ~~(samples.length / chunkSize);
@@ -133,31 +143,38 @@ export default class Ratio {
         }
       }
 
+      // downsamples.push([
+      //   this.convertAmplitudeToPx(max).toFixed(2),
+      //   this.convertAmplitudeToPx(min).toFixed(2),
+      // ]);
+
       downsamples.push([max, min]);
     }
+    console.timeEnd('Downsample');
     // console.timeEnd('Downsample');
 
     // this.broadcastUpdate();
-    this.drawUpdate(downsamples);
+    // this.drawUpdate(downsamples);
+    this.d3Draw(downsamples);
+  }
 
-    // for (let sample = startSample; sample <= endSample; sample++) {
-    //   const i = sample - startSample;
+  d3Draw(downsamples) {
+    const a = area();
 
-    //   // Which chunk are we currently comparing the current sample to
-    //   // const chunkNum = Math.floor(i / chunkSize);
-    //   const chunkNum = ~~(i / chunkSize);
+    console.time('DrawD3');
+    // a.x((d, i) => i * GRANULARITY)
+    //   .y0((d) => d[1])
+    //   .y1((d) => d[0]);
+    a.x((d, i) => i * GRANULARITY)
+      .y0((d) => this.convertAmplitudeToPx(d[1]))
+      .y1((d) => this.convertAmplitudeToPx(d[0]));
 
-    //   // Create a new array to represent this chunk if this is the first sample for this chunk
-    //   if (this.downsamples[chunkNum] === undefined) {
-    //     this.downsamples.push([0, 0]);
-    //   }
+    this.points = a(downsamples);
 
-    //   if (this.downsamples[chunkNum][0] < samples[sample]) {
-    //     this.downsamples[chunkNum][0] = samples[sample];
-    //   } else if (this.downsamples[chunkNum][1] > samples[sample]) {
-    //     this.downsamples[chunkNum][1] = samples[sample];
-    //   }
-    // }
+    console.log(this.points);
+
+    this.waveformPath.attr('d', this.points);
+    console.timeEnd('DrawD3');
 
     // this.broadcastUpdate();
   }
@@ -171,12 +188,17 @@ export default class Ratio {
     // let positivePoints = `0 ${~~this.convertAmplitudeToPx(downsamples[0][0])},`;
     // let negativePoints = `0 ${~~this.convertAmplitudeToPx(downsamples[0][1])}`;
 
-    let positivePoints = `M 0 ${~~this.convertAmplitudeToPx(
-      downsamples[0][0],
-    )} `;
-    let negativePoints = `M 0 ${~~this.convertAmplitudeToPx(
-      downsamples[0][1],
-    )}`;
+    // let positivePoints = `M 0 ${~~this.convertAmplitudeToPx(
+    //   downsamples[0][0],
+    // )} `;
+
+    // let negativePoints = `M 0 ${~~this.convertAmplitudeToPx(
+    //   downsamples[0][1],
+    // )}`;
+
+    let positivePoints = `M 0 ${downsamples[0][0]} `;
+
+    let negativePoints = `L 0 ${downsamples[0][1]} Z`;
 
     const chunkCount = downsamples.length;
 
@@ -194,21 +216,17 @@ export default class Ratio {
       //   ',' +
       //   negativePoints;
 
-      // positivePoints += `${i} ${~~this.convertAmplitudeToPx(
-      //   downsamples[i][0],
-      // )},`;
-
-      // negativePoints = `${i} ${~~this.convertAmplitudeToPx(
-      //   downsamples[i][1],
-      // )},${negativePoints}`;
-
-      positivePoints += `L ${i} ${~~this.convertAmplitudeToPx(
+      positivePoints += `${i * GRANULARITY} ${this.convertAmplitudeToPx(
         downsamples[i][0],
-      )} `;
+      )},`;
 
-      negativePoints = `L ${i} ${~~this.convertAmplitudeToPx(
+      negativePoints = `${i * GRANULARITY} ${this.convertAmplitudeToPx(
         downsamples[i][1],
-      )} ${negativePoints}`;
+      )},${negativePoints}`;
+
+      // positivePoints += `L ${i} ${downsamples[i][0]} `;
+
+      // negativePoints = `L ${i} ${downsamples[i][1]} ${negativePoints}`;
 
       // i++;
     }

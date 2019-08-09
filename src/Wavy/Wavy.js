@@ -26,12 +26,15 @@ export default class Wavy extends React.Component {
       props.endMs,
       props.selectedMsStart,
       props.selectedMsEnd,
+      this.id,
     );
 
-    this.manager.onUpdate(() =>
-      // this.setState(({ version }) => ({ version: version + 1 })),
-      this.forceUpdate(),
-    );
+    // this.manager.downsample();
+
+    // this.manager.onUpdate(() =>
+    //   // this.setState(({ version }) => ({ version: version + 1 })),
+    //   this.forceUpdate(),
+    // );
   }
 
   componentDidMount() {
@@ -95,6 +98,13 @@ export default class Wavy extends React.Component {
     const pointsString = this.manager.points;
     // console.timeEnd('Draw');
 
+    console.log(
+      this.manager.selectedPxStart,
+      this.manager.selectedPxEnd,
+      this.manager.selectedPxEnd - this.manager.selectedPxStart,
+    );
+
+    // d = { pointsString };
     return (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -111,7 +121,7 @@ export default class Wavy extends React.Component {
               <rect
                 x={this.manager.selectedPxStart}
                 width={
-                  this.manager.selectedPxEnd - this.manager.selectedMsStart
+                  this.manager.selectedPxEnd - this.manager.selectedPxStart
                 }
                 height={this.manager.height}
               />
@@ -128,15 +138,14 @@ export default class Wavy extends React.Component {
             strokeWidth="2"
             strokeLinejoin="round"
           />
-          {pointsString && (
-            <path
-              d={pointsString}
-              fill={this.colorMed()}
-              stroke={this.colorDark()}
-              strokeWidth="1"
-              strokeLinejoin="round"
-            />
-          )}
+          <path
+            id={this.id}
+            d=""
+            fill={this.colorMed()}
+            stroke={this.colorDark()}
+            strokeWidth="1"
+            strokeLinejoin="round"
+          />
           {/* {pointsString && (
             <polygon
               points={pointsString}
@@ -148,7 +157,7 @@ export default class Wavy extends React.Component {
           )} */}
         </g>
 
-        {this.manager.hasSelection() && (
+        {/* {this.manager.hasSelection() && (
           <g clipPath={`url(#selected-clip-${this.id})`}>
             <rect
               width={this.manager.width}
@@ -163,7 +172,7 @@ export default class Wavy extends React.Component {
               strokeLinejoin="round"
             />
           </g>
-        )}
+        )} */}
       </svg>
     );
   }
